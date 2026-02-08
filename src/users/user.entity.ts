@@ -12,6 +12,12 @@ export class User {
   nombre: string;
 
   @Column()
+  username: string;
+
+  @Column()
+  email: string;
+
+  @Column()
   apellido: string;
 
   @Column({ default: true })
