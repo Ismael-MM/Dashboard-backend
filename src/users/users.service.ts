@@ -1,43 +1,86 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './user.entity';
-import * as bcrypt from 'bcrypt';
+import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/wasm-compiler-edge';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-  ) {}
-
-  findAll(): Promise<User[]> {
-    return this.userRepository.find();
-  }
-
-  findOneById(id: number): Promise<User | null> {
-    return this.userRepository.findOneBy({ id });
-  }
-
-  findOneByUsername(username: string): Promise<User | null> {
-    return this.userRepository.findOneBy({ username });
-  }
+  constructor(private prisma: PrismaService) { }
 
   async create(createUserDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    const newUser = this.userRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
+    const existing = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { username: createUserDto.username },
+          { email: createUserDto.email },
+        ],
+      },
     });
 
-    const savedUser = await this.userRepository.save(newUser);
+    if (existing) {
+      const isEmail = existing.email === createUserDto.email;
+      throw new ConflictException(
+        isEmail
+          ? 'El correo ya está registrado'
+          : 'El nombre de usuario ya está en uso',
+      );
+    }
 
-    return savedUser;
+    try {
+      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+      const savedUser = await this.prisma.user.create({
+        data: {
+          email: createUserDto.email,
+          username: createUserDto.username,
+          nombre: createUserDto.nombre,
+          apellido: createUserDto.apellido,
+          password: hashedPassword,
+          // Aquí asignamos el rol (por ahora uno fijo para que no de error)
+        },
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userWithoutPassword } = savedUser;
+
+      return userWithoutPassword;
+    } catch (error) {
+      throw new InternalServerErrorException('Error al procesar el registro');
+    }
   }
 
-  async remove(id: number): Promise<void> {
-    await this.userRepository.delete(id);
+  async findAll() {
+    return await this.prisma.user.findMany({
+      include: { role: true },
+    });
+  }
+
+  async findOne(id: number): Promise<User | null> {
+    return await this.prisma.user.findUnique({
+      where: { id },
+    });
+  }
+
+  async findOneByUsername(username: string): Promise<User | null> {
+    return await this.prisma.user.findUnique({
+      where: { username },
+    });
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    return await this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
+  }
+
+  async remove(id: number) {
+    return await this.prisma.user.delete({
+      where: { id },
+    });
   }
 }
