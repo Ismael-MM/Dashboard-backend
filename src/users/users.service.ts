@@ -8,7 +8,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/wasm-compi
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
 

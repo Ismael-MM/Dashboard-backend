@@ -9,9 +9,4 @@ export class AppController {
   @Public()
   @Get('')
   nothing() {}
-
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
 }
