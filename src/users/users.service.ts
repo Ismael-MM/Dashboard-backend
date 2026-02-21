@@ -31,14 +31,16 @@ export class UsersService {
     }
 
     try {
-      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+      const { passwordConfirm, ...userData } = createUserDto;
+
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
 
       const savedUser = await this.prisma.user.create({
         data: {
-          email: createUserDto.email,
-          username: createUserDto.username,
-          nombre: createUserDto.nombre,
-          apellido: createUserDto.apellido,
+          email: userData.email,
+          username: userData.username,
+          nombre: userData.nombre,
+          apellido: userData.apellido,
           password: hashedPassword,
           // Aquí asignamos el rol (por ahora uno fijo para que no de error)
         },

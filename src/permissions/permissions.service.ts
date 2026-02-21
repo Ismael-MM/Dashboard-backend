@@ -24,7 +24,6 @@ export class PermissionsService {
   }
 
   async update(id: string, updatePermissionDto: UpdatePermissionDto) {
-
     try {
       return await this.prisma.permission.update({
         where: { id },
