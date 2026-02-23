@@ -67,9 +67,24 @@ export class UsersService {
     });
   }
 
+  async findOneByIdentifier(
+    field: string,
+    value: string,
+  ): Promise<User | null> {
+    return await this.prisma.user.findUnique({
+      where: { [field]: value } as any,
+    });
+  }
+
   async findOneByUsername(username: string): Promise<User | null> {
     return await this.prisma.user.findUnique({
       where: { username },
+    });
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    return await this.prisma.user.findUnique({
+      where: { email },
     });
   }
 

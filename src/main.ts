@@ -18,6 +18,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.enableCors();
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3000;
