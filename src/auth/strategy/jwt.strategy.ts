@@ -6,7 +6,7 @@ import { Request } from 'express';
 
 const cookieExtractor = (req: Request): string | null => {
   if (req && req.cookies) {
-    return req.cookies['acces_token'] ?? null;
+    return req.cookies['access_token'] ?? null;
   }
   return null;
 };
