@@ -1,9 +1,20 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import * as e from 'express';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+
+const COOKIE_MAX_AGE = 1000 * 60 * 60 * 24 * 7; // Tiempo de vida de la cookie: 7 días en milisegundos
 
 @Controller('auth')
 export class AuthController {
@@ -15,8 +26,18 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@Request() req, @Res({ passthrough: true }) res: e.Response) {
+    const token =  this.authService.login(req.user);
+
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', // protección básica CSRF; 'strict' si frontend y backend comparten dominio
+      maxAge: COOKIE_MAX_AGE,
+    });
+
+    const { password, ...user } = req.user;
+    return { user };
   }
 
   @Public()
@@ -25,8 +46,18 @@ export class AuthController {
     return this.userService.create(createUserDto);
   }
 
+  @Get('me')
+  async me(@Request() req) {
+    return { user: req.user };
+  }
+
   @Post('logout')
-  async logout(@Request() req) {
-    return req.logout();
+  async logout(@Res({ passthrough: true}) res: e.Response) {
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    return { message: 'Sesión cerrada correctamente' };
   }
 }
