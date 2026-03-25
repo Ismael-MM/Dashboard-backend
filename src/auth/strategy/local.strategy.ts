@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { ConfigService } from '@nestjs/config';
+import { config } from 'src/config';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -11,7 +12,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     private configService: ConfigService,
   ) {
     super({
-      usernameField: configService.get<string>('LOGIN_METHOD') || 'email',
+      usernameField: config.auth.loginMethod || 'email',
     });
   }
 

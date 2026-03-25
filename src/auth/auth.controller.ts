@@ -13,8 +13,8 @@ import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-
-const COOKIE_MAX_AGE = 1000 * 60 * 60 * 24 * 7; // Tiempo de vida de la cookie: 7 días en milisegundos
+import { config } from 'src/config';
+import ms from 'ms';
 
 @Controller('auth')
 export class AuthController {
@@ -33,7 +33,7 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax', // protección básica CSRF; 'strict' si frontend y backend comparten dominio
-      maxAge: COOKIE_MAX_AGE,
+      maxAge: ms(config.auth.ExpiresIn),
     });
 
     const { password, ...user } = req.user;

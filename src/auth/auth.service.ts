@@ -2,19 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
-import { ConfigService } from '@nestjs/config';
+import { config } from 'src/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private configService: ConfigService,
   ) {}
 
   //cambiar email por username y en local.strategy.ts para usar el usarname para login
   async validateUser(identifier: string, pass: string): Promise<any> {
-    const loginMethod = this.configService.get<string>('LOGIN_METHOD') || 'email';
+    const loginMethod = config.auth.loginMethod || 'email';
 
     const user = await this.usersService.findOneByIdentifier(loginMethod, identifier);
     if (user) {
