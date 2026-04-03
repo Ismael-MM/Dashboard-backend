@@ -1,0 +1,2 @@
+-- Column `name` had already been removed from the target database.
+-- This migration is kept as a no-op so Prisma's migration history matches the schema.

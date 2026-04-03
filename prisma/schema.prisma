@@ -19,7 +19,6 @@ model User {
   username  String   @unique
   nombre    String
   apellido  String
-  name      String?
   roleId    String?
   role      Role?    @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now())
