@@ -4,18 +4,21 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
+import { config as configcustom } from 'src/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+
+  const frontendUrl = configService.get<string>('FRONTEND_URL');
 
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL || 'http://localhost:5173',
-      'http://localhost:3000',
-    ],
-    credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept, Authorization',
+    origin: [frontendUrl, ...configcustom.cors.origin].filter(
+      Boolean,
+    ) as string[],
+    credentials: configcustom.cors.credentials,
+    methods: configcustom.cors.methods,
+    allowedHeaders: configcustom.cors.allowedHeaders,
   });
 
   app.use(cookieParser());
@@ -32,7 +35,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-  const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3000;
 
   await app.listen(port);
