@@ -14,6 +14,7 @@ import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { config } from 'src/config';
+import type { AuthenticatedRequest } from './interfaces/authenticated-request.interface';
 import ms from 'ms';
 
 @Controller('auth')
@@ -26,7 +27,10 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req, @Res({ passthrough: true }) res: e.Response) {
+  login(
+    @Request() req: AuthenticatedRequest,
+    @Res({ passthrough: true }) res: e.Response,
+  ) {
     const token = this.authService.login(req.user);
 
     res.cookie('access_token', token, {
@@ -36,7 +40,7 @@ export class AuthController {
       maxAge: ms(config.auth.ExpiresIn),
     });
 
-    const { password, ...user } = req.user;
+    const { password: _, ...user } = req.user;
     return { user };
   }
 
@@ -47,12 +51,12 @@ export class AuthController {
   }
 
   @Get('me')
-  async me(@Request() req) {
+  me(@Request() req: AuthenticatedRequest) {
     return { user: req.user };
   }
 
   @Post('logout')
-  async logout(@Res({ passthrough: true}) res: e.Response) {
+  logout(@Res({ passthrough: true }) res: e.Response) {
     res.clearCookie('access_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

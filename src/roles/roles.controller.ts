@@ -17,7 +17,10 @@ export class RolesController {
 
   @Post()
   create(@Body() createRoleDto: CreateRoleDto) {
-    return this.rolesService.create(createRoleDto);
+    return {
+      message: 'Rol Creado Correctamente',
+      data: this.rolesService.create(createRoleDto),
+    };
   }
 
   @Get()
@@ -32,7 +35,10 @@ export class RolesController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.rolesService.update(id, updateRoleDto);
+    return {
+      message: 'Rol Actualizado correctamente',
+      data: this.rolesService.update(id, updateRoleDto),
+    };
   }
 
   @Delete(':id')
