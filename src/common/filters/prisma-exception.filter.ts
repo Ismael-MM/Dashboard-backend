@@ -3,6 +3,18 @@ import { BaseExceptionFilter } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 
+interface PrismaErrorMeta {
+  target?: string[];
+  modelName?: string;
+  driverAdapterError?: {
+    cause?: {
+      originalMessage?: string;
+      originalCode?: string;
+      kind?: string;
+    };
+  };
+}
+
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaClientExceptionFilter extends BaseExceptionFilter {
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
@@ -15,12 +27,14 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     switch (exception.code) {
       case 'P2002': {
         const status = HttpStatus.CONFLICT;
-        const meta = exception.meta as any;
+        const meta = exception.meta as PrismaErrorMeta;
         let field = 'dato';
 
         // 1. Intentar por el camino estándar de Prisma
         if (meta?.target) {
-          field = Array.isArray(meta.target) ? meta.target.join(', ') : meta.target;
+          field = Array.isArray(meta.target)
+            ? meta.target.join(', ')
+            : meta.target;
         } else if (meta?.driverAdapterError?.cause?.originalMessage) {
           const msg = meta.driverAdapterError?.cause.originalMessage; // "Duplicate entry 'dada' for key 'User_username_key'"
 
