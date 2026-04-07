@@ -30,7 +30,7 @@ export class UsersService {
     }
 
     try {
-      const { passwordConfirm, ...userData } = createUserDto;
+      const { passwordConfirm: _, ...userData } = createUserDto;
 
       const hashedPassword = await bcrypt.hash(userData.password, 10);
 
@@ -61,9 +61,15 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<User | null> {
-    return await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id },
     });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    } else {
+      return user;
+    }
   }
 
   async findOneByIdentifier(
@@ -76,15 +82,27 @@ export class UsersService {
   }
 
   async findOneByUsername(username: string): Promise<User | null> {
-    return await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { username },
     });
+
+    if (!user) {
+      throw new NotFoundException(`No existe el usuario`);
+    } else {
+      return user;
+    }
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
-    return await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { email },
     });
+
+    if (!user) {
+      throw new NotFoundException(`No existe un usuario con ese email`);
+    } else {
+      return user;
+    }
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

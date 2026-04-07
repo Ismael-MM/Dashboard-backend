@@ -46,7 +46,7 @@ import { PermissionsModule } from './permissions/permissions.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
-    }
+    },
   ],
 })
 export class AppModule {}

@@ -5,7 +5,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import { config as configcustom } from 'src/config';
-import { GlobalExceptionFilter } from './common/filters/prisma-exception.filter';
+import { PrismaClientExceptionFilter } from './common/filters/prisma-exception.filter';
 import helmet from 'helmet';
 
 async function bootstrap() {
@@ -13,14 +13,6 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const frontendUrl = configService.get<string>('FRONTEND_URL');
-
-  process.on('unhandledRejection', (reason) => {
-    console.error('Unhandled Rejection:', reason);
-  });
-
-  process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
-  });
 
   app.use(helmet());
 
@@ -35,7 +27,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(new PrismaClientExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
