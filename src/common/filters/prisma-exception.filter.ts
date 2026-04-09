@@ -48,7 +48,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
 
         response.status(status).json({
           statusCode: status,
-          message: `Ya existe un registro con ese ${field}. Por favor, elige otro.`,
+          message: `Ya existe un registro con ese ${field}.`,
           error: 'Conflict',
         });
         break;
