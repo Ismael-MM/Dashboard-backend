@@ -5,6 +5,7 @@ import {
   Get,
   Request,
   Res,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import * as e from 'express';
@@ -14,6 +15,7 @@ import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { config } from 'src/config';
+import { CsrfService } from 'src/csrf/csrf.service';
 import type { AuthenticatedRequest } from './interfaces/authenticated-request.interface';
 import ms from 'ms';
 
@@ -22,6 +24,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private userService: UsersService,
+    private csrfService: CsrfService,
   ) {}
 
   @Public()
@@ -36,7 +39,7 @@ export class AuthController {
     res.cookie('access_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // protección básica CSRF; 'strict' si frontend y backend comparten dominio
+      sameSite: config.auth.cookieSameSite, // protección básica CSRF; 'strict' si frontend y backend comparten dominio
       maxAge: ms(config.auth.ExpiresIn),
     });
 
@@ -50,6 +53,13 @@ export class AuthController {
     return this.userService.create(createUserDto);
   }
 
+  @Public()
+  @Get('csrf-token')
+  getCsrfToken(@Req() req: e.Request, @Res() res: e.Response) {
+    const token = this.csrfService.generateToken(req, res);
+    res.json({ token });
+  }
+
   @Get('me')
   me(@Request() req: AuthenticatedRequest) {
     return { user: req.user };
@@ -60,7 +70,7 @@ export class AuthController {
     res.clearCookie('access_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: config.auth.cookieSameSite,
     });
     return { message: 'Sesión cerrada correctamente' };
   }

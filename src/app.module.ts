@@ -12,6 +12,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { PermissionsGuard } from './auth/guards/permissions.guard';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { CsrfModule } from './csrf/csrf.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PermissionsModule } from './permissions/permissions.module';
     PrismaModule,
     RolesModule,
     PermissionsModule,
+    CsrfModule,
   ],
   controllers: [AppController],
   providers: [

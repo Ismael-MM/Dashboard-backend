@@ -7,10 +7,12 @@ import cookieParser from 'cookie-parser';
 import { config as configcustom } from 'src/config';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-exception.filter';
 import helmet from 'helmet';
+import { CsrfService } from './csrf/csrf.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const csrfService = app.get(CsrfService);
 
   const frontendUrl = configService.get<string>('FRONTEND_URL');
 
@@ -26,6 +28,8 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+
+  app.use(csrfService.protection);
 
   app.useGlobalFilters(new PrismaClientExceptionFilter());
 
