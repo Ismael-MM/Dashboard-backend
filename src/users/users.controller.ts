@@ -12,7 +12,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RequirePermissions } from 'src/auth/decorators/permissions.decorator';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { UserFiltersDto } from './dto/filter-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -26,8 +26,8 @@ export class UsersController {
 
   @Get()
   @RequirePermissions('USERS_READ')
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.usersService.findAll(paginationDto);
+  findAll(@Query() query: UserFiltersDto) {
+    return this.usersService.findAll(query);
   }
 
   @Get(':id')

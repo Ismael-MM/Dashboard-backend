@@ -9,7 +9,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { buildUserWhere } from './helpers/build-user-where.helper';
+import { UserFiltersDto } from './dto/filter-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -60,17 +61,26 @@ export class UsersService {
     }
   }
 
-  async findAll(paginationDto: PaginationDto) {
-    const { page = 1, limit = 10 } = paginationDto;
+  async findAll(query: UserFiltersDto) {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'id',
+      sortOrder = 'desc',
+      search,
+      ...filters
+    } = query;
 
     //Cuantos registro se salta
     const skip = (page - 1) * limit;
+    const where = buildUserWhere(search, filters);
 
     const [data, total] = await Promise.all([
       this.prisma.user.findMany({
         skip,
         take: limit,
-        orderBy: { id: 'desc' },
+        where,
+        orderBy: {[sortBy]: sortOrder },
         include: {
           role: true,
         },
@@ -78,7 +88,7 @@ export class UsersService {
           password: true,
         },
       }),
-      this.prisma.user.count(),
+      this.prisma.user.count({ where }),
     ]);
 
     const totalPages = Math.ceil(total / limit);
