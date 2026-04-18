@@ -22,8 +22,19 @@ import { CsrfModule } from './csrf/csrf.module';
     ThrottlerModule.forRoot({
       throttlers: [
         {
+          name: 'short', // Ráfagas rápidas — evita spam de clicks
+          ttl: 1000,
+          limit: 5,
+        },
+        {
+          name: 'medium', // Uso normal — navegación del dashboard
           ttl: 60000,
-          limit: 10,
+          limit: 100,
+        },
+        {
+          name: 'long', // Límite hora — protege contra scraping
+          ttl: 3600000,
+          limit: 1000,
         },
       ],
     }),

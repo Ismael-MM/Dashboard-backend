@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import * as e from 'express';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Public } from './decorators/public.decorator';
@@ -16,8 +17,12 @@ import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { config } from 'src/config';
 import { CsrfService } from 'src/csrf/csrf.service';
-import type { AuthenticatedRequest } from './interfaces/authenticated-request.interface';
+import type {
+  JwTAuthenticatedRequest,
+  LocalAuthenticatedRequest,
+} from './interfaces/authenticated-request.interface';
 import ms from 'ms';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -27,11 +32,12 @@ export class AuthController {
     private csrfService: CsrfService,
   ) {}
 
+  @Throttle({ short: { limit: 3, ttl: 60000 } })
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(
-    @Request() req: AuthenticatedRequest,
+    @Request() req: LocalAuthenticatedRequest,
     @Res({ passthrough: true }) res: e.Response,
   ) {
     const token = this.authService.login(req.user);
@@ -47,6 +53,7 @@ export class AuthController {
     return { user };
   }
 
+  @Throttle({ short: { limit: 3, ttl: 60000 } })
   @Public()
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
@@ -61,8 +68,8 @@ export class AuthController {
   }
 
   @Get('me')
-  me(@Request() req: AuthenticatedRequest) {
-    return { user: req.user };
+  me(@CurrentUser() user: JwTAuthenticatedRequest) {
+    return { user };
   }
 
   @Post('logout')
