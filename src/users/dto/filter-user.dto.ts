@@ -20,9 +20,5 @@ export class UserFiltersDto extends PaginationDto {
 
   @IsOptional()
   @IsString()
-  name?: string;
-
-  @IsOptional()
-  @IsString()
   roleId?: string;
 }
