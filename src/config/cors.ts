@@ -37,5 +37,5 @@ export const corsConfig = {
   |--------------------------------------------------------------------------
   */
 
-  allowedHeaders: 'Content-Type, Accept, Authorization',
+  allowedHeaders: 'Content-Type, Accept, Authorization, x-csrf-token',
 } as const;
