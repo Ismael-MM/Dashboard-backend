@@ -15,7 +15,7 @@ import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { config } from 'src/config';
+import { config } from 'config';
 import { CsrfService } from 'src/csrf/csrf.service';
 import type {
   JwTAuthenticatedRequest,

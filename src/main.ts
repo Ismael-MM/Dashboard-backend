@@ -4,7 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
-import { config as configcustom } from 'src/config';
+import { config as configcustom } from 'config';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-exception.filter';
 import helmet from 'helmet';
 import { CsrfService } from './csrf/csrf.service';
