@@ -15,6 +15,23 @@ export const authConfig = {
 
   /*
   |--------------------------------------------------------------------------
+  | Cookie SameSite Policy
+  |--------------------------------------------------------------------------
+  |
+  | Define el nivel de restricción para el envío de cookies entre sitios.
+  | Esto es tu principal defensa contra ataques CSRF.
+  |
+  | Valores aceptados: 
+  | 'strict': Máxima seguridad. Solo envía la cookie si la petición nace en tu web.
+  | 'lax'   : Equilibrio. Envía la cookie al navegar desde enlaces externos (GET).
+  | 'none'  : Sin restricciones. (Requiere que la cookie sea 'secure: true').
+  |
+  */
+
+  cookieSameSite: 'strict',
+
+  /*
+  |--------------------------------------------------------------------------
   | Authentication ExpersIn
   |--------------------------------------------------------------------------
   |

@@ -3,7 +3,6 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Role } from '@prisma/client';
-import { InstanceLinksHost } from '@nestjs/core/injector/instance-links-host';
 
 @Injectable()
 export class RolesService {

@@ -22,6 +22,8 @@ model User {
   roleId    String?
   role      Role?    @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now())
+
+  @@map("users")
 }
 
 model Role {
@@ -29,10 +31,14 @@ model Role {
   name        String       @unique
   permissions Permission[]
   users       User[]
+
+  @@map("roles")
 }
 
 model Permission {
   id    String @id @default(uuid())
   name  String @unique
   roles Role[]
+
+  @@map("permissions")
 }

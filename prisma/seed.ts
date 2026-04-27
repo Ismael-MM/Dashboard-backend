@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import * as bcrypt from 'bcrypt'; // Descomenta si usas bcrypt
 
 const adapter = new PrismaMariaDb({
   host: process.env.DB_HOST,
@@ -12,49 +13,55 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter } as any);
 
 async function main() {
-  const permCreateUser = await prisma.permission.upsert({
-    where: { name: 'USERS_CREATE' },
-    update: {},
-    create: { name: 'USERS_CREATE' },
-  });
+  console.log('🌱 Iniciando seeding...');
 
-  const permReadUser = await prisma.permission.upsert({
-    where: { name: 'USERS_READ' },
-    update: {},
-    create: { name: 'USERS_READ' },
-  });
+  // 1. Crear Permisos
+  const permissions = ['USERS_CREATE', 'USERS_READ', 'USERS_UPDATE', 'USERS_DELETE'];
 
-  const permUpdateUser = await prisma.permission.upsert({
-    where: { name: 'USERS_UPDATE' },
-    update: {},
-    create: { name: 'USERS_UPDATE' },
-  });
+  for (const name of permissions) {
+    await prisma.permission.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
 
-  const permDeleteUser = await prisma.permission.upsert({
-    where: { name: 'USERS_DELETE' },
-    update: {},
-    create: { name: 'USERS_DELETE' },
-  });
-
+  // 2. Crear Rol ADMIN y conectar permisos
   const roleAdmin = await prisma.role.upsert({
     where: { name: 'ADMIN' },
     update: {},
     create: {
       name: 'ADMIN',
       permissions: {
-        connect: [
-          { name: 'USERS_CREATE' },
-          { name: 'USERS_READ' },
-          { name: 'USERS_UPDATE' },
-          { name: 'USERS_DELETE' },
-        ],
+        connect: permissions.map(name => ({ name })),
       },
     },
   });
 
-  console.log('Semillas creadas: Rol ADMIN con permisos de usuario');
+  // 3. Crear Usuario Administrador
+  // Nota: Si usas bcrypt, genera el hash aquí: const hashedPassword = await bcrypt.hash('admin123', 10);
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@test.com' }, // Úsalo como identificador único
+    update: {},
+    create: {
+      email: 'admin@test.com',
+      username: 'admin',
+      nombre: 'Admin',
+      apellido: 'Apellido',
+      password: hashedPassword, // ¡Recuerda hashear esto en un proyecto real!
+      roleId: roleAdmin.id, // Relacionamos el usuario con el rol ADMIN
+    },
+  });
+
+  console.log('✅ Seeding completado con éxito:');
 }
 
 main()
-  .catch((e) => console.error(e))
-  .finally(async () => await prisma.$disconnect());
+  .catch((e) => {
+    console.error('❌ Error en el seed:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

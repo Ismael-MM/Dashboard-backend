@@ -1,10 +1,16 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/wasm-compiler-edge';
+import { buildUserWhere } from './helpers/build-user-where.helper';
+import { UserFiltersDto } from './dto/filter-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -31,7 +37,7 @@ export class UsersService {
     }
 
     try {
-      const { passwordConfirm, ...userData } = createUserDto;
+      const { passwordConfirm: _, ...userData } = createUserDto;
 
       const hashedPassword = await bcrypt.hash(userData.password, 10);
 
@@ -55,16 +61,61 @@ export class UsersService {
     }
   }
 
-  async findAll() {
-    return await this.prisma.user.findMany({
-      include: { role: true },
-    });
+  async findAll(query: UserFiltersDto) {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'id',
+      sortOrder = 'desc',
+      search,
+      ...filters
+    } = query;
+
+    //Cuantos registro se salta
+    const skip = (page - 1) * limit;
+    const where = buildUserWhere(search, filters);
+
+    const [data, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+        where,
+        orderBy: {[sortBy]: sortOrder },
+        include: {
+          role: true,
+        },
+        omit: {
+          password: true,
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   async findOne(id: number): Promise<User | null> {
-    return await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id },
     });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    } else {
+      return user;
+    }
   }
 
   async findOneByIdentifier(
@@ -77,15 +128,27 @@ export class UsersService {
   }
 
   async findOneByUsername(username: string): Promise<User | null> {
-    return await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { username },
     });
+
+    if (!user) {
+      throw new NotFoundException(`No existe el usuario`);
+    } else {
+      return user;
+    }
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
-    return await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { email },
     });
+
+    if (!user) {
+      throw new NotFoundException(`No existe un usuario con ese email`);
+    } else {
+      return user;
+    }
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

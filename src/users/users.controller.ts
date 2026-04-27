@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RequirePermissions } from 'src/auth/decorators/permissions.decorator';
+import { UserFiltersDto } from './dto/filter-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -24,8 +26,8 @@ export class UsersController {
 
   @Get()
   @RequirePermissions('USERS_READ')
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() query: UserFiltersDto) {
+    return this.usersService.findAll(query);
   }
 
   @Get(':id')
@@ -34,8 +36,12 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    const data = await this.usersService.update(+id, updateUserDto)
+    return {
+      message: 'Usuario actualizado correctamente',
+      data,
+    };
   }
 
   @Delete(':id')

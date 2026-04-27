@@ -28,12 +28,12 @@ export class PermissionsGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
 
-    if (!user || !user.userId) {
+    if (!user || !user.id) {
       throw new ForbiddenException('Usuario no Identificado');
     }
 
     const dbUser = await this.prisma.user.findUnique({
-      where: { id: user.userId},
+      where: { id: user.id},
       include: {
         role: {
           include: {
