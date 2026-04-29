@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { RoleFiltersDto } from './dto/filter-role.dto';
 
 @Controller('roles')
 export class RolesController {
@@ -24,13 +26,13 @@ export class RolesController {
   }
 
   @Get()
-  findAll() {
-    return this.rolesService.findAll();
+  findAll(@Query() query: RoleFiltersDto) {
+    return this.rolesService.findAll(query);
   }
 
   @Get('list')
   findAllList() {
-    return this.rolesService.findAll();
+    return this.rolesService.findDropdownMenu();
   }
 
   @Get(':id')

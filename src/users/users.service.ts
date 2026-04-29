@@ -17,7 +17,6 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-
     const existing = await this.prisma.user.findFirst({
       where: {
         OR: [
@@ -80,7 +79,7 @@ export class UsersService {
         skip,
         take: limit,
         where,
-        orderBy: {[sortBy]: sortOrder },
+        orderBy: { [sortBy]: sortOrder },
         include: {
           role: true,
         },

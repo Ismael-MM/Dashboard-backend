@@ -3,6 +3,8 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Role } from '@prisma/client';
+import { RoleFiltersDto } from './dto/filter-role.dto';
+import { buildRoleWhere } from './helpers/build-role-where.helper';
 
 @Injectable()
 export class RolesService {
@@ -24,10 +26,48 @@ export class RolesService {
     });
   }
 
-  async findAll() {
-    return await this.prisma.role.findMany({
-      include: { permissions: true },
-    });
+  async findAll(query: RoleFiltersDto) {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'id',
+      sortOrder = 'desc',
+      search,
+      ...filters
+    } = query;
+
+    const skip = (page - 1) * limit;
+    const where = buildRoleWhere(search, filters);
+    const [data, total] = await Promise.all([
+      this.prisma.role.findMany({
+        skip,
+        take: limit,
+        where,
+        orderBy: { [sortBy]: sortOrder },
+        include: {
+          permissions: true,
+        },
+      }),
+      this.prisma.role.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  async findDropdownMenu() {
+    return await this.prisma.role.findMany();
   }
 
   async findOne(id: string): Promise<Role | null> {
