@@ -39,7 +39,7 @@ model Permission {
   id    String @id @default(uuid())
   name  String @unique
   label String @default("")
-  Group String @default("")
+  group String @default("")
   roles Role[]
 
   @@map("permissions")
