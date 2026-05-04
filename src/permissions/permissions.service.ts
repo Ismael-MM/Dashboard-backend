@@ -17,6 +17,10 @@ export class PermissionsService {
     return await this.prisma.permission.findMany({});
   }
 
+  async findDropdownMenu() {
+    return await this.prisma.role.findMany();
+  }
+
   async findOne(id: string) {
     return await this.prisma.permission.findUnique({
       where: { id },

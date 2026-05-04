@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `permissions` ADD COLUMN `Group` VARCHAR(191) NOT NULL DEFAULT '',
+    ADD COLUMN `label` VARCHAR(191) NOT NULL DEFAULT '';

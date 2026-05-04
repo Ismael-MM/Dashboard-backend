@@ -17,6 +17,11 @@ export class PermissionsController {
     return this.permissionsService.findAll();
   }
 
+  @Get('list')
+  findAllList() {
+    return this.permissionsService.findDropdownMenu();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.permissionsService.findOne(id);
