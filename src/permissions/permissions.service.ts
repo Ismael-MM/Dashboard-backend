@@ -53,7 +53,7 @@ export class PermissionsService {
   }
 
   async findDropdownMenu() {
-    return await this.prisma.role.findMany();
+    return await this.prisma.permission.findMany();
   }
 
   async findOne(id: string) {
