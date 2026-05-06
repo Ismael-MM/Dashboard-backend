@@ -151,10 +151,32 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    return await this.prisma.user.update({
-      where: { id },
-      data: updateUserDto,
-    });
+    const { password, roleId, ...userData } = updateUserDto;
+
+    const dataToUpdate: any = { ...userData };
+
+    if (password) {
+      dataToUpdate.password = await bcrypt.hash(password, 10);
+    }
+
+    if (roleId) {
+      dataToUpdate.role = {
+        connect: { id: roleId },
+      };
+    }
+
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id },
+        data: dataToUpdate,
+        include: { role: true },
+      });
+
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      return userWithoutPassword;
+    } catch (error) {
+      throw new InternalServerErrorException('Error al actualizar el usuario');
+    }
   }
 
   async remove(id: number) {

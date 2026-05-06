@@ -31,11 +31,13 @@ export class UsersController {
   }
 
   @Get(':id')
+  @RequirePermissions('USERS_READ')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
   @Patch(':id')
+  @RequirePermissions('USERS_UPDATE')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const data = await this.usersService.update(+id, updateUserDto)
     return {
@@ -45,6 +47,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @RequirePermissions('USERS_DELETE')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
