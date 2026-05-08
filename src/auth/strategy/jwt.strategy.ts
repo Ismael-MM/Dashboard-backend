@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { JwTPayload } from '../interfaces/authenticated-request.interface';
 
 const cookieExtractor = (req: Request): string | null => {
   if (req && req.cookies) {
@@ -27,7 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
+  validate(payload: any) {
     return {
       id: payload.sub,
       username: payload.username,
@@ -35,6 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       nombre: payload.nombre,
       apellido: payload.apellido,
       roleId: payload.roleId,
+      role: payload.role ?? null,
     };
   }
 }

@@ -61,6 +61,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ medium: { limit: 30, ttl: 60000 } })
   @Get('csrf-token')
   getCsrfToken(@Req() req: e.Request, @Res() res: e.Response) {
     const token = this.csrfService.generateToken(req, res);

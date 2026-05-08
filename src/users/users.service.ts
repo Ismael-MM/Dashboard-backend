@@ -123,6 +123,13 @@ export class UsersService {
   ): Promise<User | null> {
     return await this.prisma.user.findUnique({
       where: { [field]: value } as any,
+      include: {
+        role: {
+          include: {
+            permissions: true,
+          },
+        },
+      },
     });
   }
 

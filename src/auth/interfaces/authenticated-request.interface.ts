@@ -7,7 +7,12 @@ export interface JwTPayload {
   username: string;
   nombre: string;
   apellido: string;
-  reloId: string | null;
+  roleId: string | null;
+  role?: {
+    id: string;
+    name: string;
+    permissions: { id: string; name: string }[];
+  } | null;
 }
 
 export type LocalUser = User;
