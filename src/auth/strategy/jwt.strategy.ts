@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { JwTPayload } from '../interfaces/authenticated-request.interface';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 const cookieExtractor = (req: Request): string | null => {
   if (req && req.cookies) {
@@ -14,7 +15,10 @@ const cookieExtractor = (req: Request): string | null => {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private prisma: PrismaService,
+  ) {
     const secret = configService.get<string>('JWT_SECRET');
 
     if (!secret) {
@@ -28,15 +32,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: any) {
-    return {
-      id: payload.sub,
-      username: payload.username,
-      email: payload.email,
-      nombre: payload.nombre,
-      apellido: payload.apellido,
-      roleId: payload.roleId,
-      role: payload.role ?? null,
-    };
+  async validate(payload: any) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      omit: { password: true },
+      include: {
+        role: {
+          include: { permissions: true },
+        },
+      },
+    });
+
+    if (!user) return null;
+
+    return user; // ← siempre fresco de la DB
   }
 }

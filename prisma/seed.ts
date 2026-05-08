@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import * as bcrypt from 'bcrypt'; // Descomenta si usas bcrypt
+import { PermissionsList } from 'src/permissions/types/permissions-list';
 
 const adapter = new PrismaMariaDb({
   host: process.env.DB_HOST,
@@ -16,24 +17,54 @@ async function main() {
   console.log('🌱 Iniciando seeding...');
 
   // 1. Crear Permisos
-  const permissions = ['USERS_CREATE', 'USERS_READ', 'USERS_UPDATE', 'USERS_DELETE'];
+  const allPermissions = Object.values(PermissionsList);
 
-  for (const name of permissions) {
+  const permissionData: Record<string, { label: string; group: string }> = {
+    USERS_READ: { label: 'Ver Usuarios', group: 'Usuarios' },
+    USERS_CREATE: { label: 'Crear Usuarios', group: 'Usuarios' },
+    USERS_UPDATE: { label: 'Editar Usuarios', group: 'Usuarios' },
+    USERS_DELETE: { label: 'Eliminar Usuarios', group: 'Usuarios' },
+
+    ROLES_READ: { label: 'Ver Roles', group: 'Seguridad' },
+    ROLES_CREATE: { label: 'Crear Roles', group: 'Seguridad' },
+    ROLES_UPDATE: { label: 'Editar Roles', group: 'Seguridad' },
+    ROLES_DELETE: { label: 'Eliminar Roles', group: 'Seguridad' },
+
+    PERMISSIONS_READ: { label: 'Ver Permisos', group: 'Seguridad' },
+    PERMISSIONS_CREATE: { label: 'Crear Permisos', group: 'Seguridad' },
+    PERMISSIONS_UPDATE: { label: 'Editar Permisos', group: 'Seguridad' },
+    PERMISSIONS_DELETE: { label: 'Eliminar Permisos', group: 'Seguridad' },
+  };
+
+  for (const name of allPermissions) {
+    // Si el nombre no está en nuestro mapeo, usamos valores por defecto
+    const label = permissionData[name]?.label || name.replace(/_/g, ' ');
+    const group = permissionData[name]?.group || 'General';
+
     await prisma.permission.upsert({
       where: { name },
-      update: {},
-      create: { name },
+      update: { label, group }, // Actualiza si ya existe para reflejar cambios de texto
+      create: {
+        name,
+        label,
+        group,
+      },
     });
   }
 
   // 2. Crear Rol ADMIN y conectar permisos
   const roleAdmin = await prisma.role.upsert({
     where: { name: 'ADMIN' },
-    update: {},
+    update: {
+      name: 'ADMIN',
+      permissions: {
+        connect: allPermissions.map(name => ({ name })),
+      },
+    },
     create: {
       name: 'ADMIN',
       permissions: {
-        connect: permissions.map(name => ({ name })),
+        connect: allPermissions.map(name => ({ name })),
       },
     },
   });
