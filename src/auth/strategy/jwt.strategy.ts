@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { JwTPayload } from '../interfaces/authenticated-request.interface';
+import { JwTPayload } from '../types/authenticated-request.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 const cookieExtractor = (req: Request): string | null => {

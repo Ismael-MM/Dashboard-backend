@@ -20,7 +20,7 @@ import { CsrfService } from 'src/csrf/csrf.service';
 import type {
   JwTAuthenticatedRequest,
   LocalAuthenticatedRequest,
-} from './interfaces/authenticated-request.interface';
+} from './types/authenticated-request.interface';
 import ms from 'ms';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 

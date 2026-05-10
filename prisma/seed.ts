@@ -25,15 +25,15 @@ async function main() {
     USERS_UPDATE: { label: 'Editar Usuarios', group: 'Usuarios' },
     USERS_DELETE: { label: 'Eliminar Usuarios', group: 'Usuarios' },
 
-    ROLES_READ: { label: 'Ver Roles', group: 'Seguridad' },
-    ROLES_CREATE: { label: 'Crear Roles', group: 'Seguridad' },
-    ROLES_UPDATE: { label: 'Editar Roles', group: 'Seguridad' },
-    ROLES_DELETE: { label: 'Eliminar Roles', group: 'Seguridad' },
+    ROLES_READ: { label: 'Ver Roles', group: 'Roles' },
+    ROLES_CREATE: { label: 'Crear Roles', group: 'Roles' },
+    ROLES_UPDATE: { label: 'Editar Roles', group: 'Roles' },
+    ROLES_DELETE: { label: 'Eliminar Roles', group: 'Roles' },
 
-    PERMISSIONS_READ: { label: 'Ver Permisos', group: 'Seguridad' },
-    PERMISSIONS_CREATE: { label: 'Crear Permisos', group: 'Seguridad' },
-    PERMISSIONS_UPDATE: { label: 'Editar Permisos', group: 'Seguridad' },
-    PERMISSIONS_DELETE: { label: 'Eliminar Permisos', group: 'Seguridad' },
+    PERMISSIONS_READ: { label: 'Ver Permisos', group: 'Admin' },
+    PERMISSIONS_CREATE: { label: 'Crear Permisos', group: 'Admin' },
+    PERMISSIONS_UPDATE: { label: 'Editar Permisos', group: 'Admin' },
+    PERMISSIONS_DELETE: { label: 'Eliminar Permisos', group: 'Admin' },
   };
 
   for (const name of allPermissions) {
@@ -58,13 +58,13 @@ async function main() {
     update: {
       name: 'ADMIN',
       permissions: {
-        connect: allPermissions.map(name => ({ name })),
+        connect: allPermissions.map((name) => ({ name })),
       },
     },
     create: {
       name: 'ADMIN',
       permissions: {
-        connect: allPermissions.map(name => ({ name })),
+        connect: allPermissions.map((name) => ({ name })),
       },
     },
   });
