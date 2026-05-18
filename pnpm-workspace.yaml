@@ -1,0 +1,11 @@
+allowBuilds:
+  '@nestjs/core': true
+  '@prisma/engines': true
+  '@scarf/scarf': true
+  bcrypt: true
+  prisma: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@hono/node-server@1.19.13'
+overrides:
+  '@hono/node-server@<1.19.13': ^1.19.13
